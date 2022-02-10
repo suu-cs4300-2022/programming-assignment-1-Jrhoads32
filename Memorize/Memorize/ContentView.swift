@@ -1,120 +1,55 @@
 //
 //  ContentView.swift
-//  Memorize
+//  MemorizeDemo-Pt2
 //
-//  Created by Jake Rhoads on 1/26/22.
+//  Created by Jake Mac on 2/6/22.
 //
 
 import SwiftUI
 
 struct ContentView: View {
-    let vehicles = ["🚀","🚁","🚜","🚗","🚙","🚒","🚐","🚚","🚢","🛶","🚃","🛸"]
     
-    let food = ["🍔","🌭","🍆","🍒","🍑","🍉","🍩","🥑","🥓","🍟","🥩","🧀"]
-   
-    let flags = ["🇨🇦","🇯🇵","🇻🇳","🏴‍☠️","🇧🇪","🇲🇨","🇺🇸","🏳️‍🌈","🇬🇧","🏴󠁧󠁢󠁷󠁬󠁳󠁿","🇦🇱","🏴󠁧󠁢󠁳󠁣󠁴󠁿"]
+    @ObservedObject var viewModel: EmojiMemoryGame
     
-    //defaults to vehicles
-    @State var currEmojis: [String] = ["🚀","🚁","🚜","🚗","🚙","🚒","🚐","🚚","🚢","🛶","🚃","🛸"]
-    
-    
-    //Default starting number of cards to match vehicle theme
-    @State var numOfCards: Int = 8
+//    let vehicles = ["🚀","🚁","🚜","🚗","🚙","🚒","🚐","🚚","🚢","🛶","🚃","🛸"]
+//
+//    let food = ["🍔","🌭","🍆","🍒","🍑","🍉","🍩","🥑","🥓","🍟","🥩","🧀"]
+//
+//    let flags = ["🇨🇦","🇯🇵","🇻🇳","🏴‍☠️","🇧🇪","🇲🇨","🇺🇸","🏳️‍🌈","🇬🇧","🏴󠁧󠁢󠁷󠁬󠁳󠁿","🇦🇱","🏴󠁧󠁢󠁳󠁣󠁴󠁿"]
     
     var body: some View {
-        VStack {
-            title
-            Spacer()
             ScrollView {
                 LazyVGrid (columns: [GridItem(.adaptive(minimum: 65))]){
-                    ForEach(currEmojis[0..<numOfCards], id: \.self) {
-                        emoji in CardView(content: emoji)
+                    ForEach(viewModel.cards) { card in
+                        CardView(card: card)
                         .aspectRatio(2/3, contentMode: .fit)
+                        .onTapGesture {
+                            viewModel.choose(card)
+                        }
                     }
                 }
             }
             .foregroundColor(.red)
-            .padding(.top)
-            Spacer()
-            HStack {
-                vehicleThemeBtn
-                Spacer()
-                foodThemeBtn
-                Spacer()
-                flagThemeBtn
-            }
             .padding(.horizontal)
-        }
-        .padding(.horizontal)
-    }
-    
-    var title: some View {
-        HStack {
-            Text("Memorize!").font(.largeTitle)
-            Image(systemName: "square.stack.3d.up").font(.largeTitle)
-        }
-    }
-    
-    var vehicleThemeBtn: some View{
-        Button {
-            currEmojis = vehicles.shuffled()
-            numOfCards = 8
-        } label: {
-            VStack {
-                Image(systemName:"car")
-                    .font(.largeTitle)
-                Text("Vehicles")
-            }
-        }
-    }
-    
-    
-    var foodThemeBtn: some View {
-        Button {
-            currEmojis = food.shuffled()
-            numOfCards = 10
-        } label: {
-            VStack {
-                //Wish there was a better icon for food!
-                Image(systemName:"hare")
-                    .font(.largeTitle)
-                Text("Food")
-            }
-        }
-    }
-
-    var flagThemeBtn: some View{
-        Button {
-            currEmojis = flags.shuffled()
-            numOfCards = 12
-        } label: {
-            VStack {
-                Image(systemName:"flag")
-                    .font(.largeTitle)
-                Text("Flags")
-            }
-        }
     }
 }
-
+    
 struct CardView: View {
-    var content: String
-    @State var isFaceUp: Bool = true
+    let card: MemoryGame<String>.Card
     
     var body: some View{
         ZStack {
             let shape = RoundedRectangle(cornerRadius: 10.0)
-            if isFaceUp {
+            if card.isFaceUp {
                 shape.fill().foregroundColor(.white)
                 shape.strokeBorder(lineWidth: 3)
-                Text(content).font(.largeTitle)
-            } else {
+                Text(card.content).font(.largeTitle)
+            } else if card.isMatched {
+                shape.opacity(0)
+            }else {
                 shape.fill()
             }
                 
-        }
-        .onTapGesture {
-            isFaceUp = !isFaceUp
         }
     }
 }
@@ -153,11 +88,12 @@ struct CardView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        Group {
-            ContentView()
-                .preferredColorScheme(.dark)
-.previewInterfaceOrientation(.landscapeRight)
-            ContentView()
-        }
+        let game = EmojiMemoryGame()
+        ContentView(viewModel: game)
+            .preferredColorScheme(.dark)
+            .previewInterfaceOrientation(.landscapeRight)
+//        ContentView(viewModel: game)
+//            .preferredColorScheme(.light)
+        
     }
 }
