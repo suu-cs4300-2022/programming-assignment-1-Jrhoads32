@@ -1,17 +1,19 @@
 //
-//  MemorizeApp.swift
-//  Memorize
+//  MemorizeDemo_Pt2App.swift
+//  MemorizeDemo-Pt2
 //
-//  Created by Abraham Hunt on 1/24/22.
+//  Created by Jake Mac on 2/6/22.
 //
 
 import SwiftUI
 
 @main
-struct MemorizeApp: App {
+struct MemorizeDemo_Pt2App: App {
+    let game = EmojiMemoryGame()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(viewModel: game)
         }
     }
 }
